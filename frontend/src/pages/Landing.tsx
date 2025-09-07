@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   DocumentTextIcon,
@@ -10,6 +10,7 @@ import {
   PlayIcon,
 } from '@heroicons/react/24/outline';
 import { authService } from '../services/dataService';
+import DemoPopup from '../components/DemoPopup';
 
 const features = [
   {
@@ -62,6 +63,7 @@ const testimonials = [
 
 const Landing: React.FC = () => {
   const navigate = useNavigate();
+  const [showDemoPopup, setShowDemoPopup] = useState(false);
 
   useEffect(() => {
     // If user is already logged in, redirect to dashboard
@@ -73,10 +75,27 @@ const Landing: React.FC = () => {
     };
     
     checkAuth();
+
+    // Check if user has seen the demo popup before
+    const hasSeenDemoPopup = localStorage.getItem('doculaw-demo-popup-seen');
+    if (!hasSeenDemoPopup) {
+      setShowDemoPopup(true);
+    }
   }, [navigate]);
+
+  const handleCloseDemoPopup = () => {
+    setShowDemoPopup(false);
+    localStorage.setItem('doculaw-demo-popup-seen', 'true');
+  };
+
+  const handleShowDemoPopup = () => {
+    setShowDemoPopup(true);
+  };
 
   return (
     <div className="min-h-screen overflow-x-hidden">
+      {/* Demo Popup */}
+      <DemoPopup isOpen={showDemoPopup} onClose={handleCloseDemoPopup} />
       {/* Navigation */}
       <nav className="relative z-10 bg-white/90 backdrop-blur-sm border-b border-gray-200/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -86,6 +105,13 @@ const Landing: React.FC = () => {
               <span className="text-lg sm:text-xl font-bold gradient-text">DocuLaw AI</span>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4">
+              <button
+                onClick={handleShowDemoPopup}
+                className="w-8 h-8 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-white text-xs font-bold transition-colors shadow-md hover:shadow-lg animate-pulse"
+                title="Show demo disclaimer"
+              >
+                !
+              </button>
               <Link to="/auth?mode=signin" className="text-gray-600 hover:text-gray-900 transition-colors text-sm sm:text-base">
                 Sign In
               </Link>
@@ -120,7 +146,7 @@ const Landing: React.FC = () => {
             {/* Right Side - Buttons */}
             <div className="lg:col-span-2 flex flex-col justify-center space-y-6 sm:space-y-8">
               <div className="space-y-3 sm:space-y-4">
-                <Link to="/auth?mode=signup" className="block w-full max-w-sm mx-auto lg:mx-0 btn-primary text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 bg-white text-indigo-700 hover:bg-gray-50 text-center font-semibold shadow-xl">
+                <Link to="/auth?mode=signin" className="block w-full max-w-sm mx-auto lg:mx-0 btn-primary text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 bg-white text-indigo-700 hover:bg-gray-50 text-center font-semibold shadow-xl">
                   Start Your Journey →
                 </Link>
                 <button className="w-full max-w-sm mx-auto lg:mx-0 btn-ghost text-base sm:text-lg px-4 sm:px-6 py-2 sm:py-3 flex items-center justify-center border-white/40 hover:bg-white/10 hover:border-white/60 transition-all">
