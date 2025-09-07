@@ -1,20 +1,21 @@
-let supabase: any = null;
+import { createClient } from '@supabase/supabase-js';
 
-try {
-  // Only import and initialize Supabase if environment variables are present
-  if (process.env.REACT_APP_SUPABASE_URL && process.env.REACT_APP_SUPABASE_ANON_KEY) {
-    const { createClient } = require('@supabase/supabase-js');
-    const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
-    const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
-    supabase = createClient(supabaseUrl, supabaseAnonKey);
-  }
-} catch (error) {
-  console.warn('Supabase package not available, running in demo mode');
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  console.warn('⚠️ Supabase environment variables not found. Make sure to set REACT_APP_SUPABASE_URL and REACT_APP_SUPABASE_ANON_KEY in your .env file');
 }
 
-export { supabase };
+export const supabase = supabaseUrl && supabaseKey 
+  ? createClient(supabaseUrl, supabaseKey)
+  : null;
 
-export const isSupabaseConfigured = !!supabase;
+if (supabase) {
+  console.log('✅ Supabase client initialized successfully');
+} else {
+  console.log('❌ Supabase client not initialized - running in mock mode');
+}
 
 // Database types
 export interface Database {
@@ -65,6 +66,7 @@ export interface Database {
           simplification_level: number | null;
           tags: string[] | null;
           status: 'processing' | 'completed' | 'error';
+          type: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -83,6 +85,7 @@ export interface Database {
           simplification_level?: number | null;
           tags?: string[] | null;
           status?: 'processing' | 'completed' | 'error';
+          type?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -101,6 +104,7 @@ export interface Database {
           simplification_level?: number | null;
           tags?: string[] | null;
           status?: 'processing' | 'completed' | 'error';
+          type?: string | null;
           created_at?: string;
           updated_at?: string;
         };

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   HomeIcon,
@@ -34,14 +34,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Get user profile from auth service
+  // Get user profile from auth service (now synchronous)
   const currentUser = authService.getCurrentUser();
-  const userName = currentUser?.fullName || currentUser?.email || 'User';
-  const englishLevel = currentUser?.preferences?.simplificationLevel || 'intermediate';
+  
+  const userName = currentUser?.username || 'User';
+  const englishLevel = 'intermediate'; // Default level
 
-  const handleSignOut = async () => {
-    await authService.signOut();
-    navigate('/auth');
+  const handleSignOut = () => {
+    authService.signOut();
+    navigate('/');
   };
 
   const isCurrentPage = (href: string) => {

@@ -104,7 +104,7 @@ const Documents: React.FC = () => {
     return matchesSearch && matchesFilter;
   });
 
-  const getStatusIcon = (status: Document['status']) => {
+  const getStatusIcon = (status?: string) => {
     switch (status) {
       case 'completed':
         return <CheckCircleIcon className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />;
@@ -117,7 +117,7 @@ const Documents: React.FC = () => {
     }
   };
 
-  const getStatusText = (status: Document['status']) => {
+  const getStatusText = (status?: string) => {
     switch (status) {
       case 'completed':
         return 'Completed';
@@ -130,7 +130,7 @@ const Documents: React.FC = () => {
     }
   };
 
-  const getComplexityColor = (complexity?: Document['complexity']) => {
+  const getComplexityColor = (complexity?: string) => {
     switch (complexity) {
       case 'low':
         return 'bg-green-100 text-green-800';
@@ -301,7 +301,7 @@ const Documents: React.FC = () => {
                 {/* Date */}
                 <div className="flex items-center text-xs sm:text-sm text-gray-500 mb-4">
                   <CalendarIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                  {formatDate(document.createdAt)}
+                  {document.createdAt ? formatDate(document.createdAt) : 'Unknown date'}
                 </div>
 
                 {/* Actions */}

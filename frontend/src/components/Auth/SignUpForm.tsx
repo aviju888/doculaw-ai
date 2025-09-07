@@ -9,8 +9,7 @@ interface SignUpFormProps {
 
 const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess, onSwitchToSignIn }) => {
   const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
+    username: '',
     password: '',
     confirmPassword: '',
   });
@@ -31,7 +30,7 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess, onSwitchToSignIn }) 
     setLoading(true);
     setError(null);
 
-    // Validate form
+    // Basic validation
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       setLoading(false);
@@ -44,20 +43,21 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess, onSwitchToSignIn }) 
       return;
     }
 
+    console.log('📝 SignUpForm: Attempting sign up...');
+
     try {
-      const { user, error } = await authService.signUp(
-        formData.email,
-        formData.password,
-        formData.fullName
-      );
+      const result = await authService.signUp(formData.username, formData.password);
       
-      if (error) {
-        setError(error);
-      } else if (user) {
+      if (!result.success) {
+        console.log('❌ SignUpForm: Sign up failed:', result.error);
+        setError(result.error || 'Sign up failed');
+      } else {
+        console.log('✅ SignUpForm: Sign up successful');
         onSuccess();
       }
     } catch (err) {
-      setError('An unexpected error occurred');
+      console.error('❌ SignUpForm: Unexpected error:', err);
+      setError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -79,34 +79,18 @@ const SignUpForm: React.FC<SignUpFormProps> = ({ onSuccess, onSwitchToSignIn }) 
           )}
 
           <div>
-            <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
-              Full Name
+            <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+              Username
             </label>
             <input
-              id="fullName"
-              name="fullName"
+              id="username"
+              name="username"
               type="text"
-              value={formData.fullName}
+              value={formData.username}
               onChange={handleChange}
               required
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-legal-500 focus:border-legal-500"
-              placeholder="Enter your full name"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-              Email Address
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-legal-500 focus:border-legal-500"
-              placeholder="Enter your email"
+              placeholder="Enter your username"
             />
           </div>
 

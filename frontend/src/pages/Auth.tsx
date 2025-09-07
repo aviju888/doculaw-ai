@@ -11,23 +11,34 @@ const Auth: React.FC = () => {
 
   useEffect(() => {
     // Check if user is already logged in
-    const currentUser = authService.getCurrentUser();
-    if (currentUser) {
-      navigate('/dashboard');
-      return;
-    }
+    const checkAuth = async () => {
+      const currentUser = await authService.getCurrentUser();
+      if (currentUser) {
+        navigate('/dashboard');
+        return;
+      }
 
-    // Check URL params for auth mode
-    const mode = searchParams.get('mode');
-    if (mode === 'signup') {
-      setAuthMode('signup');
-    }
+      // Check URL params for auth mode
+      const mode = searchParams.get('mode');
+      if (mode === 'signup') {
+        setAuthMode('signup');
+      } else if (mode === 'signin') {
+        setAuthMode('signin');
+      }
+    };
+    
+    checkAuth();
   }, [navigate, searchParams]);
 
-  const handleAuthSuccess = () => {
-    // Redirect to dashboard or intended destination
+  const handleSignInSuccess = () => {
+    // Existing users go to dashboard or intended destination
     const redirectTo = searchParams.get('redirect') || '/dashboard';
     navigate(redirectTo);
+  };
+
+  const handleSignUpSuccess = () => {
+    // New users go to onboarding first
+    navigate('/onboarding');
   };
 
   return (
@@ -45,12 +56,12 @@ const Auth: React.FC = () => {
         {/* Auth Forms */}
         {authMode === 'signin' ? (
           <SignInForm
-            onSuccess={handleAuthSuccess}
+            onSuccess={handleSignInSuccess}
             onSwitchToSignUp={() => setAuthMode('signup')}
           />
         ) : (
           <SignUpForm
-            onSuccess={handleAuthSuccess}
+            onSuccess={handleSignUpSuccess}
             onSwitchToSignIn={() => setAuthMode('signin')}
           />
         )}

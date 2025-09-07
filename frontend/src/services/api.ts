@@ -10,11 +10,16 @@ import {
   SearchResult,
 } from '../types';
 import { UserProfile } from '../utils/helpers';
+import { documentService, chatService, authService } from './dataService';
 
 class ApiService {
   private api: AxiosInstance;
+  private isDemoMode: boolean;
 
   constructor() {
+    // Enable demo mode when no backend URL is set or explicitly enabled
+    this.isDemoMode = !process.env.REACT_APP_API_BASE_URL || process.env.REACT_APP_DEMO_MODE === 'true';
+    
     this.api = axios.create({
       baseURL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:3001/api',
       timeout: 30000,
@@ -50,6 +55,31 @@ class ApiService {
 
   // Document Management
   async uploadDocument(file: File): Promise<DocumentUploadResponse> {
+    if (this.isDemoMode) {
+      console.log('🎭 Mock document upload:', file.name);
+      
+      // Simulate upload delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Create mock document
+      const mockDoc = await documentService.createDocument({
+        title: file.name.replace(/\.[^/.]+$/, ""), // Remove extension
+        content: 'This is a simplified version of your uploaded document. In the real application, AI would process and simplify the actual content.',
+        originalContent: 'Original document content would be extracted and stored here.',
+        summary: 'AI-generated summary of the document would appear here.',
+        complexity: 'medium',
+        type: 'Uploaded Document',
+        fileSize: file.size,
+        pageCount: Math.ceil(file.size / 2000), // Rough estimate
+      });
+      
+      return {
+        documentId: mockDoc?.id || 'mock-doc-id',
+        status: 'completed',
+        estimatedProcessingTime: 0,
+      };
+    }
+    
     const formData = new FormData();
     formData.append('document', file);
     
@@ -74,6 +104,29 @@ class ApiService {
   }
 
   async getDocuments(): Promise<Document[]> {
+    if (this.isDemoMode) {
+      console.log('🎭 Mock get documents');
+      const { documents } = await documentService.getUserDocuments();
+      return documents.map(doc => ({
+        id: doc.id,
+        title: doc.title,
+        originalTitle: doc.originalTitle,
+        originalContent: doc.originalContent || '',
+        simplifiedContent: doc.simplifiedContent,
+        uploadDate: new Date(doc.createdAt || Date.now()),
+        processedDate: new Date(doc.createdAt || Date.now()),
+        status: doc.status as 'processing' | 'completed' | 'error' || 'completed',
+        type: doc.type,
+        fileType: 'application/pdf', // Mock file type
+        fileSize: doc.fileSize || 0,
+        pageCount: doc.pageCount,
+        summary: doc.summary,
+        complexity: doc.complexity as 'low' | 'medium' | 'high' || 'medium',
+        simplificationLevel: doc.simplificationLevel,
+        tags: doc.tags,
+      }));
+    }
+    
     const response = await this.api.get<ApiResponse<Document[]>>('/documents');
     return response.data.data;
   }

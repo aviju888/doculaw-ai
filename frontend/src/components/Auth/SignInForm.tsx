@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { authService } from '../../services/dataService';
+import { useNavigate } from 'react-router-dom';
 
 interface SignInFormProps {
   onSuccess: () => void;
@@ -8,6 +9,7 @@ interface SignInFormProps {
 }
 
 const SignInForm: React.FC<SignInFormProps> = ({ onSuccess, onSwitchToSignUp }) => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('demo@doculaw.ai');
   const [password, setPassword] = useState('demo123');
   const [showPassword, setShowPassword] = useState(false);
@@ -19,16 +21,21 @@ const SignInForm: React.FC<SignInFormProps> = ({ onSuccess, onSwitchToSignUp }) 
     setLoading(true);
     setError(null);
 
+    console.log('🔐 SignInForm: Attempting sign in...');
+
     try {
-      const { user, error } = await authService.signIn(email, password);
+      const result = await authService.signIn(email, password);
       
-      if (error) {
-        setError(error);
-      } else if (user) {
+      if (!result.success) {
+        console.log('❌ SignInForm: Sign in failed:', result.error);
+        setError(result.error || 'Sign in failed');
+      } else {
+        console.log('✅ SignInForm: Sign in successful');
         onSuccess();
       }
     } catch (err) {
-      setError('An unexpected error occurred');
+      console.error('❌ SignInForm: Unexpected error:', err);
+      setError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -45,7 +52,7 @@ const SignInForm: React.FC<SignInFormProps> = ({ onSuccess, onSwitchToSignUp }) 
         {/* Demo credentials notice */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
           <p className="text-sm text-blue-800">
-            <strong>Demo Account:</strong><br />
+            <strong>🎭 Demo Mode Active</strong><br />
             Email: demo@doculaw.ai<br />
             Password: demo123
           </p>
@@ -60,7 +67,7 @@ const SignInForm: React.FC<SignInFormProps> = ({ onSuccess, onSwitchToSignUp }) 
 
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-              Email Address
+              Email
             </label>
             <input
               id="email"
@@ -101,13 +108,65 @@ const SignInForm: React.FC<SignInFormProps> = ({ onSuccess, onSwitchToSignUp }) 
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full btn-primary py-3 text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Signing In...' : 'Sign In'}
-          </button>
+          <div className="space-y-3">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full btn-primary py-3 text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Signing In...' : 'Sign In'}
+            </button>
+            
+            <button
+              type="button"
+              onClick={async () => {
+                setLoading(true);
+                setError(null);
+                try {
+                  const result = await authService.signIn('demo@doculaw.ai', 'demo123');
+                  if (result.success) {
+                    onSuccess();
+                  } else {
+                    setError(result.error || 'Demo login failed');
+                  }
+                } catch (err) {
+                  setError('Demo login failed');
+                } finally {
+                  setLoading(false);
+                }
+              }}
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-4 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              🎭 Quick Demo Login
+            </button>
+            
+            <button
+              type="button"
+              onClick={async () => {
+                setLoading(true);
+                setError(null);
+                try {
+                  // First authenticate the user
+                  const result = await authService.signIn('demo@doculaw.ai', 'demo123');
+                  if (result.success) {
+                    // Navigate directly to onboarding for the demo walkthrough
+                    navigate('/onboarding?demo=true');
+                  } else {
+                    setError(result.error || 'Demo failed');
+                  }
+                } catch (err) {
+                  setError('Demo failed');
+                } finally {
+                  setLoading(false);
+                }
+              }}
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 px-4 rounded-lg font-medium hover:from-green-600 hover:to-emerald-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              🚀 Demo Onboarding Walkthrough
+            </button>
+          </div>
         </form>
 
         <div className="mt-6 text-center">

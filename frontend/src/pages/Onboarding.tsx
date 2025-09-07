@@ -92,6 +92,7 @@ const commonNeeds = [
 const Onboarding: React.FC = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
+  const [isDemoMode, setIsDemoMode] = useState(false);
   const [data, setData] = useState<OnboardingData>({
     name: '',
     primaryLanguage: '',
@@ -101,6 +102,28 @@ const Onboarding: React.FC = () => {
     readingPreference: '',
     communicationStyle: '',
   });
+
+  // Demo data for walkthrough
+  const demoData: OnboardingData = {
+    name: 'Alex Demo',
+    primaryLanguage: 'Spanish',
+    englishProficiency: 'intermediate',
+    legalExperience: 'some',
+    primaryNeeds: ['rental', 'employment', 'insurance'],
+    readingPreference: 'standard',
+    communicationStyle: 'visual',
+  };
+
+  // Check if this is a demo walkthrough
+  React.useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const isDemo = urlParams.get('demo') === 'true';
+    if (isDemo) {
+      setIsDemoMode(true);
+      // Pre-fill with demo data but let user go through steps
+      setData(demoData);
+    }
+  }, []);
 
   const handleNext = () => {
     if (currentStep < steps.length) {
@@ -451,6 +474,11 @@ const Onboarding: React.FC = () => {
             <div className="flex items-center space-x-2">
               <img src="/assets/logo-mark.svg" alt="DocuLaw AI" className="h-6 w-6" />
               <span className="text-lg font-bold gradient-text">DocuLaw AI</span>
+              {isDemoMode && (
+                <span className="bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs px-2 py-1 rounded-full">
+                  🚀 Demo Walkthrough
+                </span>
+              )}
             </div>
             <div className="text-sm text-gray-500">
               Step {currentStep} of {steps.length}
@@ -496,6 +524,23 @@ const Onboarding: React.FC = () => {
 
       {/* Main Content */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Demo Mode Banner */}
+        {isDemoMode && (
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-4 mb-6">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <span className="text-2xl">🚀</span>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-green-800">Demo Walkthrough Active</h3>
+                <div className="mt-1 text-sm text-green-700">
+                  This form is pre-filled with sample data. Feel free to modify any fields or click through to see the full onboarding experience!
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8">
           {renderStep()}
         </div>
@@ -504,18 +549,29 @@ const Onboarding: React.FC = () => {
       {/* Navigation */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 sm:px-6 lg:px-8 py-4">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <button
-            onClick={handlePrevious}
-            disabled={currentStep === 1}
-            className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
-              currentStep === 1
-                ? 'text-gray-400 cursor-not-allowed'
-                : 'text-gray-700 hover:bg-gray-100'
-            }`}
-          >
-            <ArrowLeftIcon className="h-5 w-5 mr-2" />
-            Previous
-          </button>
+          <div className="flex items-center space-x-3">
+            <button
+              onClick={handlePrevious}
+              disabled={currentStep === 1}
+              className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
+                currentStep === 1
+                  ? 'text-gray-400 cursor-not-allowed'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              <ArrowLeftIcon className="h-5 w-5 mr-2" />
+              Previous
+            </button>
+            
+            {isDemoMode && currentStep < steps.length && (
+              <button
+                onClick={() => setCurrentStep(steps.length)}
+                className="text-sm text-green-600 hover:text-green-700 hover:bg-green-50 px-3 py-1 rounded transition-colors"
+              >
+                🚀 Skip to End
+              </button>
+            )}
+          </div>
           
           {currentStep < steps.length ? (
             <button
@@ -535,7 +591,7 @@ const Onboarding: React.FC = () => {
               onClick={handleComplete}
               className="btn-primary px-8 py-3"
             >
-              Complete Setup
+              {isDemoMode ? '🎭 Complete Demo Setup' : 'Complete Setup'}
             </button>
           )}
         </div>

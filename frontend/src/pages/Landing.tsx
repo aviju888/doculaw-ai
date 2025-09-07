@@ -1,5 +1,5 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   DocumentTextIcon,
   ChatBubbleBottomCenterTextIcon,
@@ -11,6 +11,7 @@ import {
   PlayIcon,
 } from '@heroicons/react/24/outline';
 import { GlassButton } from '../components/ui';
+import { authService } from '../services/dataService';
 
 const features = [
   {
@@ -62,6 +63,20 @@ const testimonials = [
 ];
 
 const Landing: React.FC = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // If user is already logged in, redirect to dashboard
+    const checkAuth = async () => {
+      const currentUser = await authService.getCurrentUser();
+      if (currentUser) {
+        navigate('/dashboard');
+      }
+    };
+    
+    checkAuth();
+  }, [navigate]);
+
   return (
     <div className="min-h-screen overflow-x-hidden">
       {/* Navigation */}
@@ -73,10 +88,10 @@ const Landing: React.FC = () => {
               <span className="text-lg sm:text-xl font-bold gradient-text">DocuLaw AI</span>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-4">
-              <Link to="/login" className="text-gray-600 hover:text-gray-900 transition-colors text-sm sm:text-base">
+              <Link to="/auth?mode=signin" className="text-gray-600 hover:text-gray-900 transition-colors text-sm sm:text-base">
                 Sign In
               </Link>
-              <Link to="/onboarding" className="btn-primary text-sm sm:text-base px-3 py-2 sm:px-4 sm:py-2">
+              <Link to="/auth?mode=signup" className="btn-primary text-sm sm:text-base px-3 py-2 sm:px-4 sm:py-2">
                 Get Started
               </Link>
             </div>
@@ -107,7 +122,7 @@ const Landing: React.FC = () => {
             {/* Right Side - Buttons */}
             <div className="lg:col-span-2 flex flex-col justify-center space-y-6 sm:space-y-8">
               <div className="space-y-3 sm:space-y-4">
-                <Link to="/onboarding" className="block w-full max-w-sm mx-auto lg:mx-0 btn-primary text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 bg-white text-indigo-700 hover:bg-gray-50 text-center font-semibold shadow-xl">
+                <Link to="/auth?mode=signup" className="block w-full max-w-sm mx-auto lg:mx-0 btn-primary text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 bg-white text-indigo-700 hover:bg-gray-50 text-center font-semibold shadow-xl">
                   Start Your Journey →
                 </Link>
                 <button className="w-full max-w-sm mx-auto lg:mx-0 btn-ghost text-base sm:text-lg px-4 sm:px-6 py-2 sm:py-3 flex items-center justify-center border-white/40 hover:bg-white/10 hover:border-white/60 transition-all">

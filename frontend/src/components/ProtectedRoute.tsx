@@ -11,8 +11,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const currentUser = authService.getCurrentUser();
 
   if (!currentUser) {
-    // Redirect to auth page with current location as redirect parameter
-    return <Navigate to={`/auth?redirect=${encodeURIComponent(location.pathname)}`} replace />;
+    // If user is trying to access the root protected routes, send to landing
+    if (location.pathname === '/dashboard' || location.pathname === '/home') {
+      return <Navigate to="/" replace />;
+    }
+    // Otherwise, redirect to auth page with current location as redirect parameter
+    return <Navigate to={`/auth?mode=signin&redirect=${encodeURIComponent(location.pathname)}`} replace />;
   }
 
   return <>{children}</>;

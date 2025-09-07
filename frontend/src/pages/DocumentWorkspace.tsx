@@ -300,7 +300,7 @@ Would you like me to point you to the specific section that covers this, or expl
             </button>
             <div>
               <h1 className="text-xl font-bold text-gray-900">{document.title}</h1>
-              <p className="text-sm text-gray-500">Uploaded {formatDate(document.createdAt)}</p>
+              <p className="text-sm text-gray-500">Uploaded {document.createdAt ? formatDate(document.createdAt) : 'Unknown date'}</p>
             </div>
           </div>
           
