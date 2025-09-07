@@ -6,8 +6,6 @@ import {
   MagnifyingGlassIcon,
   CloudArrowUpIcon,
   ChartBarIcon,
-  ClockIcon,
-  StarIcon,
   ArrowRightIcon,
   EllipsisVerticalIcon,
 } from '@heroicons/react/24/outline';
@@ -93,7 +91,6 @@ const Home: React.FC = () => {
   // Get user profile from localStorage (from onboarding)
   const userProfile = JSON.parse(localStorage.getItem('doculaw_user_profile') || '{}');
   const userName = userProfile.name || 'there';
-  const englishLevel = userProfile.englishProficiency || 'intermediate';
 
   return (
     <div className="space-y-6 sm:space-y-8 overflow-x-hidden">
@@ -226,19 +223,19 @@ const Home: React.FC = () => {
           
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
             <div className="text-center">
-              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-700 mb-1 sm:mb-2">3</div>
+              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-700 mb-1 sm:mb-2">-</div>
               <div className="text-xs sm:text-sm text-gray-600">Documents Processed</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-700 mb-1 sm:mb-2">12</div>
+              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-700 mb-1 sm:mb-2">-</div>
               <div className="text-xs sm:text-sm text-gray-600">Questions Asked</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-700 mb-1 sm:mb-2">85%</div>
+              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-700 mb-1 sm:mb-2">-</div>
               <div className="text-xs sm:text-sm text-gray-600">Complexity Reduced</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-700 mb-1 sm:mb-2">7</div>
+              <div className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-700 mb-1 sm:mb-2">-</div>
               <div className="text-xs sm:text-sm text-gray-600">Days Active</div>
             </div>
           </div>

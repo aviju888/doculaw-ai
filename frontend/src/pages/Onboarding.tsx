@@ -12,7 +12,6 @@ import {
   UserIcon,
 } from '@heroicons/react/24/outline';
 import { saveUserProfile } from '../utils/helpers';
-import { GlassButton } from '../components/ui';
 
 interface OnboardingData {
   name: string;
@@ -123,7 +122,7 @@ const Onboarding: React.FC = () => {
       // Pre-fill with demo data but let user go through steps
       setData(demoData);
     }
-  }, []);
+  }, [demoData]);
 
   const handleNext = () => {
     if (currentStep < steps.length) {
