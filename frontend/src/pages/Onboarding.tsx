@@ -102,17 +102,6 @@ const Onboarding: React.FC = () => {
     communicationStyle: '',
   });
 
-  // Demo data for walkthrough
-  const demoData: OnboardingData = {
-    name: 'Alex Demo',
-    primaryLanguage: 'Spanish',
-    englishProficiency: 'intermediate',
-    legalExperience: 'some',
-    primaryNeeds: ['rental', 'employment', 'insurance'],
-    readingPreference: 'standard',
-    communicationStyle: 'visual',
-  };
-
   // Check if this is a demo walkthrough
   React.useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -120,9 +109,18 @@ const Onboarding: React.FC = () => {
     if (isDemo) {
       setIsDemoMode(true);
       // Pre-fill with demo data but let user go through steps
+      const demoData: OnboardingData = {
+        name: 'Alex Demo',
+        primaryLanguage: 'Spanish',
+        englishProficiency: 'intermediate',
+        legalExperience: 'some',
+        primaryNeeds: ['rental', 'employment', 'insurance'],
+        readingPreference: 'standard',
+        communicationStyle: 'visual',
+      };
       setData(demoData);
     }
-  }, [demoData]);
+  }, []);
 
   const handleNext = () => {
     if (currentStep < steps.length) {

@@ -4,13 +4,11 @@ import {
   DocumentTextIcon,
   ChatBubbleBottomCenterTextIcon,
   MagnifyingGlassIcon,
-  ShieldCheckIcon,
   UserGroupIcon,
   GlobeAltIcon,
   StarIcon,
   PlayIcon,
 } from '@heroicons/react/24/outline';
-import { GlassButton } from '../components/ui';
 import { authService } from '../services/dataService';
 
 const features = [
@@ -36,9 +34,9 @@ const features = [
 
 const stats = [
   { label: 'Documents Simplified', value: '10K+', icon: DocumentTextIcon },
-  { label: 'Communities Served', value: '500+', icon: UserGroupIcon },
-  { label: 'Languages Supported', value: '15+', icon: GlobeAltIcon },
-  { label: 'User Satisfaction', value: '4.9/5', icon: StarIcon },
+  { label: 'Communities Served', value: '100+', icon: UserGroupIcon },
+  { label: 'Languages Supported', value: '10+', icon: GlobeAltIcon },
+  { label: 'User Satisfaction', value: '5/5', icon: StarIcon },
 ];
 
 const testimonials = [
@@ -168,17 +166,17 @@ const Landing: React.FC = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 mb-8 sm:mb-12 md:mb-16">
             <div className="card-elevated p-6 sm:p-8 text-center group">
-              <div className="text-3xl sm:text-4xl md:text-5xl font-bold gradient-text mb-3 sm:mb-4 group-hover:scale-110 transition-transform">67%</div>
+              <div className="text-3xl sm:text-4xl md:text-5xl font-bold gradient-text mb-3 sm:mb-4 group-hover:scale-110 transition-transform">50%</div>
               <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">Struggle to Understand</h3>
               <p className="text-sm sm:text-base text-gray-600">of Americans can't comprehend basic legal documents</p>
             </div>
             <div className="card-elevated p-6 sm:p-8 text-center group">
-              <div className="text-3xl sm:text-4xl md:text-5xl font-bold gradient-text mb-3 sm:mb-4 group-hover:scale-110 transition-transform">$350</div>
+              <div className="text-3xl sm:text-4xl md:text-5xl font-bold gradient-text mb-3 sm:mb-4 group-hover:scale-110 transition-transform">$100</div>
               <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">Per Hour</h3>
               <p className="text-sm sm:text-base text-gray-600">Average cost of legal consultation in major cities</p>
             </div>
             <div className="card-elevated p-6 sm:p-8 text-center group">
-              <div className="text-3xl sm:text-4xl md:text-5xl font-bold gradient-text mb-3 sm:mb-4 group-hover:scale-110 transition-transform">45M</div>
+              <div className="text-3xl sm:text-4xl md:text-5xl font-bold gradient-text mb-3 sm:mb-4 group-hover:scale-110 transition-transform">1M</div>
               <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">Need Help</h3>
               <p className="text-sm sm:text-base text-gray-600">Americans who need but cannot afford legal assistance</p>
             </div>
