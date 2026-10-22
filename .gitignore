@@ -1,0 +1,14 @@
+node_modules/
+modern/dist/
+frontend/build/
+backend/dist/
+backend/data/
+.env
+.env.*
+!.env.example
+.DS_Store
+playwright-report/
+test-results/
+site/
+.npm-cache/
+artifacts/

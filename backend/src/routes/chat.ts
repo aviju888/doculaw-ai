@@ -89,6 +89,7 @@ router.get('/sessions/:id', (req, res) => {
 
 // Send message and get AI response
 router.post('/sessions/:id/messages', async (req, res) => {
+  if (!process.env.GROQ_API_KEY) return res.status(503).json({success:false,message:'Chat requires a configured Groq provider.',data:null});
   try {
     const { content, documentId } = req.body;
     const session = getSession(req.params.id);

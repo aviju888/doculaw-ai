@@ -12,7 +12,6 @@ import {
   UserIcon,
 } from '@heroicons/react/24/outline';
 import { saveUserProfile } from '../utils/helpers';
-import { GlassButton } from '../components/ui';
 
 interface OnboardingData {
   name: string;

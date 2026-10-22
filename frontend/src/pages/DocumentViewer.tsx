@@ -7,86 +7,21 @@ import {
   DocumentDuplicateIcon,
   ChatBubbleBottomCenterTextIcon,
 } from '@heroicons/react/24/outline';
+import apiService from '../services/api';
 import { Document } from '../types';
 import { formatDate, formatFileSize } from '../utils/helpers';
-
-// Mock document data
-const mockDocument: Document = {
-  id: '1',
-  title: 'Employment Contract - Tech Company',
-  originalContent: `EMPLOYMENT AGREEMENT
-
-This Employment Agreement ("Agreement") is entered into as of [DATE], between [COMPANY NAME], a Delaware corporation ("Company"), and [EMPLOYEE NAME], an individual ("Employee").
-
-WHEREAS, Company desires to employ Employee on the terms and conditions set forth herein; and
-WHEREAS, Employee desires to be employed by Company on such terms and conditions;
-
-NOW, THEREFORE, in consideration of the mutual covenants and agreements contained herein, and for other good and valuable consideration, the receipt and sufficiency of which are hereby acknowledged, the parties agree as follows:
-
-1. EMPLOYMENT AND DUTIES
-Employee shall serve as [POSITION TITLE] and shall have such powers, duties, and responsibilities as may be prescribed by Company's Board of Directors or Chief Executive Officer. Employee agrees to devote Employee's full business time and attention to the performance of Employee's duties hereunder.
-
-2. TERM
-This Agreement shall commence on [START DATE] and shall continue until terminated in accordance with the provisions hereof.
-
-3. COMPENSATION
-As compensation for Employee's services hereunder, Company shall pay Employee a base salary of $[AMOUNT] per annum, payable in accordance with Company's regular payroll practices.
-
-4. CONFIDENTIALITY
-Employee acknowledges that Employee may have access to certain confidential and proprietary information of Company. Employee agrees to maintain the confidentiality of such information and not to disclose it to any third party.`,
-  
-  simplifiedContent: `EMPLOYMENT AGREEMENT - SIMPLIFIED VERSION
-
-This is an employment contract between you and the company.
-
-KEY POINTS:
-
-What this contract is about:
-• The company wants to hire you for a specific job
-• You want to work for the company
-• This contract explains the rules for your employment
-
-Your Job (Section 1):
-• You will work as [POSITION TITLE]
-• Your boss and the company's leaders will tell you what to do
-• You need to focus all your work time on this job
-
-How Long This Lasts (Section 2):
-• Your job starts on [START DATE]
-• It continues until either you quit or the company lets you go (following the rules in this contract)
-
-Your Pay (Section 3):
-• The company will pay you $[AMOUNT] per year
-• You'll get paid according to the company's normal schedule (like every two weeks)
-
-Keeping Secrets (Section 4):
-• You might learn company secrets while working
-• You cannot tell these secrets to anyone outside the company
-• This protects the company's private information
-
-IMPORTANT: This is a simplified explanation. The original legal document contains more details and specific legal terms that may be important for your situation.`,
-  
-  uploadDate: new Date('2024-01-15'),
-  status: 'completed',
-  fileType: 'application/pdf',
-  fileSize: 2048000,
-  summary: 'Employment agreement with standard terms and benefits',
-  complexity: 'medium',
-};
 
 const DocumentViewer: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [document, setDocument] = useState<Document | null>(null);
   const [loading, setLoading] = useState(true);
   const [showComparison, setShowComparison] = useState(true);
-  const [activeView, setActiveView] = useState<'original' | 'simplified'>('simplified');
+  const [activeView, setActiveView] = useState<'original' | 'simplified'>('original');
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setDocument(mockDocument);
-      setLoading(false);
-    }, 1000);
+    if (!id) return;
+    setLoading(true);
+    apiService.getDocument(id).then(setDocument).catch(() => setDocument(null)).finally(() => setLoading(false));
   }, [id]);
 
   if (loading) {
@@ -131,6 +66,7 @@ const DocumentViewer: React.FC = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">{document.title}</h1>
+            <a href={"/?document="+encodeURIComponent(document.id)} className="text-sm text-blue-700 underline">Read and ask questions in the new workspace ↗</a>
             <div className="mt-2 flex items-center text-sm text-gray-500">
               <span>Uploaded {formatDate(document.uploadDate)}</span>
               <span className="mx-2">•</span>

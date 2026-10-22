@@ -7,6 +7,7 @@ const router = Router();
 
 // Search documents
 router.post('/documents', async (req, res) => {
+  if (!process.env.PINECONE_API_KEY || !process.env.OPENAI_API_KEY) return res.status(503).json({success:false,message:'Search requires configured embedding and vector providers.',data:[]});
   try {
     const { query, filters, limit = 10 } = req.body as SearchQuery;
 

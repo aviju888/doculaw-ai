@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { Document, ChatSession } from '../types';
 
-const DATA_DIR = path.join(__dirname, '../../data');
+const DATA_DIR = process.env.DOCULAW_DATA_DIR || path.join(__dirname, '../../data');
 const DOCUMENTS_DIR = path.join(DATA_DIR, 'documents');
 const SESSIONS_DIR = path.join(DATA_DIR, 'sessions');
 const DOCUMENTS_INDEX = path.join(DATA_DIR, 'documents.json');

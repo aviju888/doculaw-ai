@@ -10,78 +10,21 @@ import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
   MagnifyingGlassIcon,
-  FunnelIcon,
 } from '@heroicons/react/24/outline';
+import apiService from '../services/api';
 import { Document } from '../types';
-import { formatDate, formatFileSize, truncateText } from '../utils/helpers';
-
-// Mock data - replace with actual API calls
-const mockDocuments: Document[] = [
-  {
-    id: '1',
-    title: 'Employment Contract - Tech Company',
-    originalTitle: 'Employment Agreement between TechCorp Inc. and John Doe',
-    originalContent: 'This is a complex employment contract...',
-    type: 'contract',
-    status: 'completed',
-    uploadDate: new Date('2024-01-10'),
-    processedDate: new Date('2024-01-10'),
-    complexity: 'high',
-    simplificationLevel: 85,
-    tags: ['employment', 'contract', 'confidentiality'],
-    summary: 'Standard employment contract with confidentiality clauses and termination conditions.',
-    fileType: 'application/pdf',
-    fileSize: 2.5,
-    pageCount: 12,
-  },
-  {
-    id: '2',
-    title: 'Rental Agreement Simplified',
-    originalTitle: 'Residential Lease Agreement - 123 Main Street',
-    originalContent: 'Whereas the lessor agrees to lease...',
-    type: 'lease',
-    status: 'completed',
-    uploadDate: new Date('2024-01-08'),
-    processedDate: new Date('2024-01-08'),
-    complexity: 'medium',
-    simplificationLevel: 92,
-    tags: ['rental', 'lease', 'property'],
-    summary: 'One-year rental lease with standard terms and conditions for residential property.',
-    fileType: 'application/pdf',
-    fileSize: 1.8,
-    pageCount: 8,
-  },
-  {
-    id: '3',
-    title: 'Insurance Policy Terms',
-    originalTitle: 'Comprehensive Auto Insurance Policy Document',
-    originalContent: 'This insurance policy describes coverage...',
-    type: 'insurance',
-    status: 'processing',
-    uploadDate: new Date('2024-01-12'),
-    complexity: 'high',
-    simplificationLevel: 0,
-    tags: ['insurance', 'auto', 'coverage'],
-    summary: 'Auto insurance policy with comprehensive coverage details.',
-    fileType: 'application/pdf',
-    fileSize: 4.2,
-    pageCount: 24,
-  },
-];
+import { formatDate, formatFileSize } from '../utils/helpers';
 
 const Documents: React.FC = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'completed' | 'processing' | 'error'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<string>('date');
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setDocuments(mockDocuments);
-      setLoading(false);
-    }, 1000);
+    apiService.getDocuments().then(setDocuments).catch(() => setError('Could not load documents. Check the backend connection.')).finally(() => setLoading(false));
   }, []);
 
   const filteredDocuments = documents.filter(doc => {
@@ -104,19 +47,6 @@ const Documents: React.FC = () => {
     }
   };
 
-  const getStatusText = (status: Document['status']) => {
-    switch (status) {
-      case 'completed':
-        return 'Completed';
-      case 'processing':
-        return 'Processing';
-      case 'error':
-        return 'Error';
-      default:
-        return 'Unknown';
-    }
-  };
-
   const getComplexityColor = (complexity?: Document['complexity']) => {
     switch (complexity) {
       case 'low':
@@ -130,8 +60,8 @@ const Documents: React.FC = () => {
     }
   };
 
-  const deleteDocument = (id: string) => {
-    setDocuments(prev => prev.filter(doc => doc.id !== id));
+  const deleteDocument = async (id: string) => {
+    try { await apiService.deleteDocument(id); setDocuments(prev => prev.filter(doc => doc.id !== id)); } catch { setError('Could not delete the document.'); }
   };
 
   if (loading) {
@@ -147,6 +77,7 @@ const Documents: React.FC = () => {
 
   return (
     <div className="space-y-6 sm:space-y-8 overflow-x-hidden">
+      {error && <p role="alert" className="px-4 text-red-700">{error}</p>}
       {/* Header */}
       <div className="px-4 sm:px-6 lg:px-8">
         <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">My Documents</h1>
@@ -253,20 +184,20 @@ const Documents: React.FC = () => {
                   <div>
                     <span className="text-gray-500">Simplified:</span>
                     <span className="ml-1 font-medium text-green-600">
-                      {document.simplificationLevel}%
+                      {document.simplificationLevel == null ? "—" : `${document.simplificationLevel}%`}
                     </span>
                   </div>
                   <div>
                     <span className="text-gray-500">Pages:</span>
-                    <span className="ml-1 font-medium">{document.pageCount}</span>
+                    <span className="ml-1 font-medium">{document.pageCount ?? "—"}</span>
                   </div>
                   <div>
                     <span className="text-gray-500">Size:</span>
-                    <span className="ml-1 font-medium">{document.fileSize}MB</span>
+                    <span className="ml-1 font-medium">{formatFileSize(document.fileSize)}</span>
                   </div>
                   <div>
                     <span className="text-gray-500">Type:</span>
-                    <span className="ml-1 font-medium capitalize">{document.type}</span>
+                    <span className="ml-1 font-medium capitalize">{document.type ?? "—"}</span>
                   </div>
                 </div>
 
@@ -294,7 +225,7 @@ const Documents: React.FC = () => {
                 {/* Actions */}
                 <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
                   <Link
-                    to={`/document/${document.id}`}
+                    to={`/documents/${document.id}`}
                     className="flex-1 btn-primary text-center text-xs sm:text-sm py-2"
                   >
                     <EyeIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />

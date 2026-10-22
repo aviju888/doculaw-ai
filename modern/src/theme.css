@@ -1,0 +1,122 @@
+@import "tailwindcss";
+@import "./craft.css";
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono-face), ui-monospace, "SF Mono", monospace;
+
+  --color-page: var(--page);
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-inset: var(--inset);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-hover: var(--hover);
+  --color-hover-2: var(--hover-2);
+  --color-field: var(--field);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-line-soft: var(--line-soft);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-tint: var(--accent-tint);
+  --color-accent-fg: var(--accent-fg);
+  --color-green: var(--green);
+  --color-green-tint: var(--green-tint);
+  --color-orange: var(--orange);
+  --color-orange-tint: var(--orange-tint);
+  --color-red: var(--red);
+  --color-red-tint: var(--red-tint);
+
+  --shadow-xs: var(--sh-xs);
+  --shadow-sm: var(--sh-sm);
+  --shadow-md: var(--sh-md);
+  --shadow-lg: var(--sh-lg);
+  --shadow-hairline: var(--sh-hairline);
+  --shadow-btn: var(--sh-btn);
+  --shadow-inset-field: var(--sh-inset-field);
+  --shadow-card: var(--sh-card);
+  --shadow-raised: var(--sh-raised);
+  --shadow-overlay: var(--sh-overlay);
+
+  --radius-chip: 6px;
+  --radius-control: 8px;
+  --radius-card: 10px;
+  --radius-window: 14px;
+
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-link: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root {
+  --page: oklch(98.5% 0.001 286.376);
+  --canvas: oklch(96.1% 0.002 247.84);
+  --surface: oklch(100% 0 0);
+  --inset: oklch(97.9% 0.002 247.839);
+  --hover: oklch(97% 0.002 247.839);
+  --hover-2: oklch(93.3% 0.003 247.86);
+  --ink: oklch(24.7% 0.006 258.361);
+  --ink-2: oklch(50.6% 0.01 264.477);
+  --ink-3: oklch(69.5% 0.009 264.505);
+  --line: oklch(94.6% 0.003 264.542);
+  --line-strong: oklch(91.2% 0.005 258.326);
+  --line-soft: oklch(96.6% 0.002 264.542);
+  --grid-line: var(--line);
+  --field: oklch(96.1% 0.001 286.375);
+  --stripe: oklch(40.5% 0 0 / 0.075);
+  --stripe-bg: oklch(97% 0 0);
+
+  --accent: oklch(62.6% 0.205 254.947);
+  --accent-ink: oklch(55.6% 0.187 255.617);
+  --accent-tint: oklch(96% 0.019 252.878);
+  --accent-fg: oklch(100% 0 0);
+  --green: oklch(60.3% 0.155 150.883);
+  --green-tint: oklch(95.8% 0.017 159.118);
+  --orange: oklch(68.9% 0.179 49.902);
+  --orange-tint: oklch(96.4% 0.021 67.581);
+  --red: oklch(62.1% 0.192 23.042);
+  --red-tint: oklch(95.6% 0.017 17.462);
+
+  --tooltip-bg: oklch(27.2% 0.008 264.435);
+  --tooltip-fg: oklch(97.6% 0.002 247.839);
+  --tooltip-muted: oklch(73.1% 0.008 260.731);
+  --tooltip-border: oklch(35.6% 0.007 264.474);
+
+  --sh-xs: 0 0 4px 0 #0000000a;
+  --sh-sm: 0 18px 47px 0 #00000008, 0 7.5px 19px 0 #00000005, 0 4px 10.5px 0 #00000005,
+    0 2.3px 5.8px 0 #00000003, 0 1.2px 3.1px 0 #00000003, 0 0.5px 1.3px 0 #00000003;
+  --sh-md: 0 17.54px 23.39px 0 #0000000a, 0 9.4px 12.5px 0 #00000008, 0 5.25px 7px 0 #00000005,
+    0 2.79px 3.72px -2px #00000003, 0 1.16px 1.5px 0 #00000003;
+  --sh-lg: 0 25px 50px 0 #0000000d, 0 12px 24px 0 #0000000a, 0 6px 12px 0 #00000008,
+    0 3px 6px 0 #00000005, 0 1.5px 3px 0 #00000005;
+  --sh-hairline: 0 0 0 1px var(--line);
+  --sh-btn: 0 0 0 1px var(--line-strong), var(--sh-xs);
+  --sh-card: 0 0 0 1px var(--line), var(--sh-sm);
+  --sh-raised: 0 0 0 1px var(--line), var(--sh-md);
+  --sh-overlay: 0 0 0 1px var(--line), var(--sh-lg);
+  --sh-inset-field: inset 0 1px 2px oklch(0% 0 0 / 0.12);
+
+  --smooth-ring-color: #0000000d;
+  --image-outline: oklch(0% 0 0 / 0.1);
+
+  color-scheme: light;
+}
+
+body {margin:0; background:var(--canvas); color:var(--ink); font-family:Inter,ui-sans-serif,system-ui,sans-serif;}
+button,a,input,textarea { -webkit-tap-highlight-color:transparent; }
+button {cursor:pointer;}
+.num{font-variant-numeric:tabular-nums;}
+
+@keyframes fade-up{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:0.01ms!important;transition-duration:0.01ms!important;scroll-behavior:auto!important;}}
+
+.primitive-card-pad{padding:12px}
+.primitive-card-bar{padding:10px 12px}
+.primitive-card-footer{padding:10px}
+.primitive-table-cell{padding:10px 12px}
+.primitive-icon-button{border-radius:var(--radius-control);justify-content:center;align-items:center;width:28px;height:28px;display:inline-flex}
+@keyframes shimmer-text{0%{background-position:150%}to{background-position:-50%}}
+@keyframes pop-in{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:none}}
