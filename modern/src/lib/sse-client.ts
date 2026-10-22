@@ -15,7 +15,8 @@ export function parseFrame(frame: string): SSEFrame | null {
   for (const line of frame.split("\n")) {
     if (line.startsWith(":")) continue;
     if (line.startsWith("event:")) event = line.slice(6).trim();
-    else if (line.startsWith("data:")) data.push(line.slice(5).replace(/^ /, ""));
+    else if (line.startsWith("data:"))
+      data.push(line.slice(5).replace(/^ /, ""));
   }
   if (data.length === 0) return null;
   const raw = data.join("\n");
@@ -27,7 +28,10 @@ export function parseFrame(frame: string): SSEFrame | null {
 }
 
 /** Splits a growing buffer into complete frames plus the unfinished remainder. */
-export function splitFrames(buffer: string): { frames: string[]; rest: string } {
+export function splitFrames(buffer: string): {
+  frames: string[];
+  rest: string;
+} {
   const parts = buffer.replace(/\r\n/g, "\n").split("\n\n");
   const rest = parts.pop() ?? "";
   return { frames: parts.filter((p) => p.trim().length > 0), rest };
@@ -41,28 +45,41 @@ export async function postSSE(
 ): Promise<void> {
   const res = await fetch(apiURL(url), {
     method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "text/event-stream" },
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "text/event-stream",
+    },
     body: JSON.stringify(body),
     signal,
   });
   if (!res.ok || !res.body) {
     const detail = await res.text().catch(() => "");
-    throw new Error(`${res.status} ${res.statusText} ${detail.slice(0, 200)}`.trim());
+    throw new Error(
+      `${res.status} ${res.statusText} ${detail.slice(0, 200)}`.trim(),
+    );
   }
   const reader = res.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    const { frames, rest } = splitFrames(buffer);
-    buffer = rest;
-    for (const f of frames) {
-      const parsed = parseFrame(f);
-      if (parsed) onEvent(parsed.event, parsed.data);
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const { frames, rest } = splitFrames(buffer);
+      buffer = rest;
+      for (const f of frames) {
+        const parsed = parseFrame(f);
+        if (!parsed) continue;
+        onEvent(parsed.event, parsed.data);
+        if (parsed.event === "done") return;
+      }
     }
+    throw new Error(
+      "The response ended before it was complete. Please try again.",
+    );
+  } finally {
+    await reader.cancel().catch(() => {});
+    reader.releaseLock();
   }
-  const tail = parseFrame(buffer);
-  if (tail) onEvent(tail.event, tail.data);
 }

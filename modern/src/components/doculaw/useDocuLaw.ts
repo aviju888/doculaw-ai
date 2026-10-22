@@ -111,7 +111,7 @@ function reducer(s: State, a: Action): State {
     case "loadFailed":
       return { ...INITIAL, level: s.level, error: a.error };
     case "side":
-      return { ...s, perspective: a.perspective };
+      return { ...s, perspective: a.perspective, fetchingLevels: [] };
     case "task":
       return { ...s, tasks: { ...s.tasks, [a.key]: { ...s.tasks[a.key], ...a.patch } } };
     case "structure":
@@ -152,25 +152,32 @@ function reducer(s: State, a: Action): State {
 export function useDocuLaw(live: boolean) {
   const [s, dispatch] = useReducer(reducer, INITIAL);
   const abort = useRef<AbortController | null>(null);
+  const documentGeneration = useRef(0);
+  const levelRequests = useRef(new Map<Level, AbortController>());
 
-  const cancel = () => {
+  const cancel = useCallback(() => {
+    documentGeneration.current++;
     abort.current?.abort();
     abort.current = null;
-  };
+    for (const request of levelRequests.current.values()) request.abort();
+    levelRequests.current.clear();
+  }, []);
 
-  useEffect(() => () => abort.current?.abort(), []);
+  useEffect(() => cancel, [cancel]);
 
   const runAnalysis = useCallback(
     async (doc: Loaded, perspective: string) => {
       cancel();
       const ctrl = new AbortController();
       abort.current = ctrl;
+      const generation = documentGeneration.current;
+      const isCurrent = () => !ctrl.signal.aborted && documentGeneration.current === generation;
       dispatch({ type: "side", perspective });
       let buffer: { clauseId: string; level: Level; text: string; source: "fixture" | "rules" | "model" }[] = [];
       let raf = 0;
       const flush = () => {
         raf = 0;
-        if (buffer.length) dispatch({ type: "rewrites", items: buffer });
+        if (isCurrent() && buffer.length) dispatch({ type: "rewrites", items: buffer });
         buffer = [];
       };
       const source = doc.doc.sampleId ? "Hand-written for the sample" : live ? "Groq" : "Rule-based reading";
@@ -179,6 +186,7 @@ export function useDocuLaw(live: boolean) {
           "/api/doculaw/analyze",
           { text: doc.text, sampleId: doc.doc.sampleId },
           (event, raw) => {
+            if (!isCurrent()) return;
             const data = raw as Record<string, unknown>;
             switch (event) {
               case "task": {
@@ -277,7 +285,7 @@ export function useDocuLaw(live: boolean) {
         dispatch({ type: "analyzeError", error: err instanceof Error ? err.message : "The analysis stopped." });
       }
     },
-    [live],
+    [live, cancel],
   );
 
   const load = useCallback(
@@ -298,7 +306,7 @@ export function useDocuLaw(live: boolean) {
         dispatch({ type: "loadFailed", error: err instanceof Error ? err.message : "Couldn't read that document." });
       }
     },
-    [runAnalysis],
+    [runAnalysis, cancel],
   );
 
   const chooseSide = useCallback(
@@ -315,7 +323,7 @@ export function useDocuLaw(live: boolean) {
   const reset = useCallback(() => {
     cancel();
     dispatch({ type: "reset" });
-  }, []);
+  }, [cancel]);
 
   // intake → ready: shortly after the last task finishes (live mode: once risks are in)
   useEffect(() => {
@@ -341,7 +349,11 @@ export function useDocuLaw(live: boolean) {
       const st = s.structure;
       if (!live || !st) return;
       const missing = st.clauses.filter((c) => c.text.trim() && !s.rewrites[c.id]?.[level]);
-      if (!missing.length || s.fetchingLevels.includes(level)) return;
+      if (!missing.length || levelRequests.current.has(level)) return;
+      const ctrl = new AbortController();
+      const generation = documentGeneration.current;
+      const isCurrent = () => !ctrl.signal.aborted && documentGeneration.current === generation;
+      levelRequests.current.set(level, ctrl);
       dispatch({ type: "fetchingLevel", level, on: true });
       try {
         await postSSE(
@@ -354,13 +366,16 @@ export function useDocuLaw(live: boolean) {
             clauses: missing.map((c) => ({ id: c.id, citation: c.citation, title: c.title, text: c.text })),
           },
           (event, data) => {
+            if (!isCurrent()) return;
             if (event === "rewrite") dispatch({ type: "rewrites", items: [data as { clauseId: string; level: Level; text: string; source: "fixture" | "rules" | "model" }] });
           },
+          ctrl.signal,
         );
       } catch {
-        dispatch({ type: "notice", message: "Couldn't load that level. Try again in a moment." });
+        if (isCurrent()) dispatch({ type: "notice", message: "Couldn't load that level. Try again in a moment." });
       } finally {
-        dispatch({ type: "fetchingLevel", level, on: false });
+        if (levelRequests.current.get(level) === ctrl) levelRequests.current.delete(level);
+        if (isCurrent()) dispatch({ type: "fetchingLevel", level, on: false });
       }
     },
     [live, s.structure, s.rewrites, s.fetchingLevels, s.doc],

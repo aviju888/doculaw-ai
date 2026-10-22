@@ -71,7 +71,7 @@ function Answer({ m }: { m: Msg }) {
       {m.status === "error" ? (
         <p className="text-[13px] text-red">{m.error}</p>
       ) : m.answer ? (
-        <div className="text-[13px] leading-relaxed text-ink">
+        <div role="region" aria-label="Assistant answer" className="text-[13px] leading-relaxed text-ink">
           <RichText text={m.answer} pop streaming={m.status === "streaming"} />
         </div>
       ) : null}

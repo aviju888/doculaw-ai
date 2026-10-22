@@ -40,23 +40,37 @@ const fs = require("node:fs");
   await question.fill("What happens if I pay rent late?");
   await page.getByRole("button", { name: "Send", exact: true }).click();
 
-  await page.waitForTimeout(2500);
-  assert((await page.locator("body").innerText()).includes("late"));
+  const completed = page.getByRole("button", {
+    name: "Copy answer",
+    exact: true,
+  });
+  await completed.waitFor({ timeout: 20000 });
+  const assistant = page.getByRole("region", {
+    name: "Assistant answer",
+    exact: true,
+  });
+  assert.match(
+    await assistant.innerText(),
+    /\$75/,
+    "Completed assistant answer must include the sample's $75 late fee.",
+  );
+  assert(
+    (await assistant.getByRole("button", { name: /Go to §5/ }).count()) > 0,
+    "Completed assistant answer must cite the sample late-fee clause.",
+  );
   await page.screenshot({
     path: output + "/answer-desktop.png",
     fullPage: true,
     animations: "disabled",
   });
   await page.goto(base);
-  await page
-    .locator("input[type=file]")
-    .setInputFiles({
-      name: "owned-browser-fixture.txt",
-      mimeType: "text/plain",
-      buffer: Buffer.from(
-        "SERVICE AGREEMENT\n1. Payment\nThe Client shall pay the Provider $500 per month.\n2. Termination\nEither party may terminate this agreement with 30 days written notice.",
-      ),
-    });
+  await page.locator("input[type=file]").setInputFiles({
+    name: "owned-browser-fixture.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from(
+      "SERVICE AGREEMENT\n1. Payment\nThe Client shall pay the Provider $500 per month.\n2. Termination\nEither party may terminate this agreement with 30 days written notice.",
+    ),
+  });
   const skip = page.getByRole("button", { name: "Skip", exact: true });
   await skip.waitFor({ timeout: 3000 }).catch(() => {});
   if (await skip.isVisible()) await skip.click();
@@ -95,15 +109,13 @@ const fs = require("node:fs");
     "Modern CSS must not leak into Classic",
   );
   await page.goto(base + "/upload");
-  await page
-    .locator("input[type=file]")
-    .setInputFiles({
-      name: "classic-owned-browser.txt",
-      mimeType: "text/plain",
-      buffer: Buffer.from(
-        "CLASSIC OWNED FIXTURE. The Client shall pay $700 every month under this agreement.",
-      ),
-    });
+  await page.locator("input[type=file]").setInputFiles({
+    name: "classic-owned-browser.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from(
+      "CLASSIC OWNED FIXTURE. The Client shall pay $700 every month under this agreement.",
+    ),
+  });
   await page.getByText("Completed", { exact: true }).waitFor();
   await page.goto(base + "/documents");
   await page

@@ -129,3 +129,48 @@ it("rejects a provider stream with no final answer content", async () => {
     })(),
   ).rejects.toThrow("complete answer");
 });
+it("rejects nonempty provider EOF before any successful terminal event", async () => {
+  provider(
+    new Response(
+      'data: {"choices":[{"delta":{"content":"You may terminate only if"}}]}\n\n',
+    ),
+  );
+  await expect(
+    (async () => {
+      let text = "";
+      for await (const part of stream({
+        messages: [{ role: "user", content: "Owned fixture?" }],
+      }))
+        text += part;
+      return text;
+    })(),
+  ).rejects.toThrow("complete");
+});
+it("accepts a successful stop event when the transport closes without DONE", async () => {
+  provider(
+    new Response(
+      'data: {"choices":[{"delta":{"content":"Pay $500."}}]}\n\ndata: {"choices":[{"delta":{},"finish_reason":"stop"}]}\n\n',
+    ),
+  );
+  let text = "";
+  for await (const part of stream({
+    messages: [{ role: "user", content: "Owned fixture?" }],
+  }))
+    text += part;
+  expect(text).toBe("Pay $500.");
+});
+it("rejects a truncation finish event even after nonempty content", async () => {
+  provider(
+    new Response(
+      'data: {"choices":[{"delta":{"content":"You may terminate only if"}}]}\n\ndata: {"choices":[{"delta":{},"finish_reason":"length"}]}\n\ndata: [DONE]\n\n',
+    ),
+  );
+  await expect(
+    (async () => {
+      for await (const _ of stream({
+        messages: [{ role: "user", content: "Owned fixture?" }],
+      })) {
+      }
+    })(),
+  ).rejects.toThrow("cut short");
+});

@@ -102,6 +102,7 @@ export async function* stream(opts: CompleteOpts): AsyncGenerator<string> {
   const decoder = new TextDecoder();
   let buffer = "";
   let receivedContent = false;
+  let completed = false;
   try {
     for (;;) {
       const { done, value } = await reader.read();
@@ -125,8 +126,9 @@ export async function* stream(opts: CompleteOpts): AsyncGenerator<string> {
               finish_reason?: string;
             }[];
           };
-          if (chunk.choices?.[0]?.finish_reason === "length")
-            throw new Error("The provider response was cut short.");
+          const finish = chunk.choices?.[0]?.finish_reason;
+          if (finish === "stop") completed = true;
+          else if (finish) throw new Error("The provider response was cut short.");
           const delta = chunk.choices?.[0]?.delta?.content;
           if (delta) {
             receivedContent = true;
@@ -137,7 +139,7 @@ export async function* stream(opts: CompleteOpts): AsyncGenerator<string> {
         }
       }
     }
-    if (!receivedContent)
+    if (!receivedContent || !completed)
       throw new Error("The provider did not return a complete answer.");
   } finally {
     await reader.cancel().catch(() => {});

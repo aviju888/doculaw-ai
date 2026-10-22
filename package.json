@@ -1,11 +1,14 @@
 {
-  "name": "doculaw-ai", "private": true,
-  "engines": {"node": ">=22.12"},
+  "name": "doculaw-ai",
+  "private": true,
+  "engines": {
+    "node": ">=22.12"
+  },
   "scripts": {
     "install:all": "npm ci --prefix backend && npm ci --prefix frontend && npm ci --prefix modern",
     "build": "npm run build --prefix backend && PUBLIC_URL=/classic npm run build --prefix frontend && npm run build --prefix modern && node scripts/package-site.mjs",
     "start": "npm start --prefix backend",
-    "test": "npm test --prefix backend",
+    "test": "npm test --prefix backend && npm test --prefix modern",
     "typecheck": "npm run typecheck --prefix modern && npx --prefix frontend tsc --noEmit -p frontend/tsconfig.json && npm run build --prefix backend"
   }
 }

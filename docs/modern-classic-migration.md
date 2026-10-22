@@ -64,3 +64,15 @@ Parent coordinator owns independent review. No push, PR, merge or deploy occurre
 The static Vercel package still needs an independently hosted backend, build-time public API origins and hosted acceptance. The combined Express build is the fully exercised local path. Rollback: return the default to the existing Classic document or revert this feature commit; data remains in the original format.
 
 Recommendation: independently review both interfaces locally, then run bounded provider/hosted acceptance with owned fixtures before deciding whether to publish the branch.
+
+## Independent review fix wave
+
+The review of `a4d05c37` found two stream lifecycle defects. This focused follow-up rejects provider EOF without `[DONE]` or a successful `finish_reason: stop` event, and rejects application EOF without a complete `done` frame. Truncated content can no longer be represented as a completed answer. Stream readers are canceled/released on completion and failure.
+
+On-demand reading levels now have individual AbortControllers plus a document-generation guard. Reset, load, reanalysis and unmount cancel all level requests; stale callbacks, errors and completion cleanup cannot modify the next document or clear its pending state. Primary-analysis callbacks and buffered rewrites use the same generation check.
+
+Regression evidence: the old implementation failed on the exact nonempty provider EOF string `You may terminate only if`, two incomplete application-stream cases, delayed document A overwriting B's repeated clause ID `1`, stale A errors, and absent level-request unmount cancellation. All now pass. New frontend tests deliberately deliver callbacks after abort to verify the generation guard, not merely a cooperative network mock.
+
+Tiny compatibility corrections: Classic formats the API's byte-valued file size with the existing formatter and displays unavailable optional stats as an em dash. Browser acceptance now waits for the completed assistant answer, then checks **that answer region** for the sample's `$75` late fee and a `§5` citation; the submitted question cannot satisfy those assertions. The labelled answer region adds accessibility without changing layout.
+
+Validation: `npm test` passed **139 tests** (132 backend, 7 modern frontend), `npm run typecheck` passed, `CI=true npm run build` passed, and the stronger owned-fixture browser smoke passed with zero page errors. Modern's test-only dependencies are dev dependencies; production still starts compiled JavaScript. The pre-existing Browserslist maintenance notice remains nonblocking. Independent scoped re-review is pending; hosted/live-provider acceptance remains separate.

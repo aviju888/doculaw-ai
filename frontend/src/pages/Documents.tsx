@@ -13,7 +13,7 @@ import {
 } from '@heroicons/react/24/outline';
 import apiService from '../services/api';
 import { Document } from '../types';
-import { formatDate } from '../utils/helpers';
+import { formatDate, formatFileSize } from '../utils/helpers';
 
 const Documents: React.FC = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -184,20 +184,20 @@ const Documents: React.FC = () => {
                   <div>
                     <span className="text-gray-500">Simplified:</span>
                     <span className="ml-1 font-medium text-green-600">
-                      {document.simplificationLevel}%
+                      {document.simplificationLevel == null ? "—" : `${document.simplificationLevel}%`}
                     </span>
                   </div>
                   <div>
                     <span className="text-gray-500">Pages:</span>
-                    <span className="ml-1 font-medium">{document.pageCount}</span>
+                    <span className="ml-1 font-medium">{document.pageCount ?? "—"}</span>
                   </div>
                   <div>
                     <span className="text-gray-500">Size:</span>
-                    <span className="ml-1 font-medium">{document.fileSize}MB</span>
+                    <span className="ml-1 font-medium">{formatFileSize(document.fileSize)}</span>
                   </div>
                   <div>
                     <span className="text-gray-500">Type:</span>
-                    <span className="ml-1 font-medium capitalize">{document.type}</span>
+                    <span className="ml-1 font-medium capitalize">{document.type ?? "—"}</span>
                   </div>
                 </div>
 
