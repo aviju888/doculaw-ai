@@ -1,3 +1,4 @@
+import apiService from '../services/api';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -5,75 +6,24 @@ import {
   ChatBubbleBottomCenterTextIcon,
   MagnifyingGlassIcon,
   ClockIcon,
-  ChartBarIcon,
   ArrowTrendingUpIcon,
 } from '@heroicons/react/24/outline';
 import { Document, ChatSession } from '../types';
-import { formatDate, formatRelativeTime } from '../utils/helpers';
-
-// Mock dashboard data
-const mockStats = {
-  totalDocuments: 12,
-  documentsThisMonth: 5,
-  totalChatSessions: 8,
-  chatSessionsThisWeek: 3,
-  averageComplexityReduction: 68,
-  timesSaved: 24,
-};
-
-const mockRecentDocuments: Document[] = [
-  {
-    id: '1',
-    title: 'Employment Contract - Tech Company',
-    uploadDate: new Date('2024-01-15'),
-    status: 'completed',
-    fileType: 'application/pdf',
-    fileSize: 2048000,
-    complexity: 'medium',
-    originalContent: '',
-  },
-  {
-    id: '2',
-    title: 'Lease Agreement - Apartment',
-    uploadDate: new Date('2024-01-14'),
-    status: 'processing',
-    fileType: 'application/pdf',
-    fileSize: 1536000,
-    complexity: 'high',
-    originalContent: '',
-  },
-];
-
-const mockRecentChats: ChatSession[] = [
-  {
-    id: '1',
-    title: 'Questions about Employment Contract',
-    messages: [],
-    createdAt: new Date('2024-01-15T14:30:00'),
-    updatedAt: new Date('2024-01-15T15:45:00'),
-  },
-  {
-    id: '2',
-    title: 'Understanding Lease Terms',
-    messages: [],
-    createdAt: new Date('2024-01-14T10:15:00'),
-    updatedAt: new Date('2024-01-14T10:45:00'),
-  },
-];
+import { formatRelativeTime } from '../utils/helpers';
 
 const Dashboard: React.FC = () => {
-  const [stats, setStats] = useState(mockStats);
+  const [stats, setStats] = useState({totalDocuments:0,documentsThisMonth:0,totalChatSessions:0,chatSessionsThisWeek:0,averageComplexityReduction:0,timesSaved:0});
   const [recentDocuments, setRecentDocuments] = useState<Document[]>([]);
   const [recentChats, setRecentChats] = useState<ChatSession[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error,setError]=useState('');
 
   useEffect(() => {
-    // Simulate API calls
-    setTimeout(() => {
-      setRecentDocuments(mockRecentDocuments);
-      setRecentChats(mockRecentChats);
-      setLoading(false);
-    }, 1000);
+    Promise.all([apiService.getDocuments(),apiService.getChatSessions()]).then(([documents,chats])=>{
+      setRecentDocuments(documents.slice(-5).reverse());setRecentChats(chats.slice(-5).reverse());
+      const month=new Date().getMonth();const week=Date.now()-7*86400000;
+      setStats({totalDocuments:documents.length,documentsThisMonth:documents.filter(d=>new Date(d.uploadDate).getMonth()===month).length,totalChatSessions:chats.length,chatSessionsThisWeek:chats.filter(c=>new Date(c.createdAt).getTime()>week).length,averageComplexityReduction:0,timesSaved:0});
+    }).catch(()=>setError('Could not load activity. Check the backend connection.')).finally(()=>setLoading(false));
   }, []);
 
   const getStatusColor = (status: Document['status']) => {
@@ -117,6 +67,7 @@ const Dashboard: React.FC = () => {
     <div className="px-4 sm:px-6 lg:px-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+        {error && <p role="alert" className="text-red-700">{error}</p>}
         <p className="mt-2 text-gray-600">
           Overview of your legal document analysis and AI interactions
         </p>
@@ -155,7 +106,7 @@ const Dashboard: React.FC = () => {
             <ArrowTrendingUpIcon className="h-8 w-8 text-green-600" />
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Complexity Reduced</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.averageComplexityReduction}%</p>
+              <p className="text-2xl font-bold text-gray-900">—</p>
             </div>
           </div>
           <div className="mt-2">
@@ -168,7 +119,7 @@ const Dashboard: React.FC = () => {
             <ClockIcon className="h-8 w-8 text-purple-600" />
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Hours Saved</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.timesSaved}</p>
+              <p className="text-2xl font-bold text-gray-900">—</p>
             </div>
           </div>
           <div className="mt-2">

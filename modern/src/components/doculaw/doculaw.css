@@ -1,0 +1,179 @@
+/* DocuLaw-only styles. Prefixed "dl-" so nothing collides with the shared kit. */
+
+/* risk squiggles: wavy underline by severity; muted when the risk sits with the other side */
+.dl-squiggle {
+  text-decoration-line: underline;
+  text-decoration-style: wavy;
+  text-decoration-thickness: 1.25px;
+  text-underline-offset: 3px;
+  text-decoration-skip-ink: none;
+  border-radius: 3px;
+  cursor: help;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.dl-squiggle[data-sev="high"] {
+  text-decoration-color: var(--red);
+}
+.dl-squiggle[data-sev="medium"] {
+  text-decoration-color: var(--orange);
+}
+.dl-squiggle[data-sev="low"] {
+  text-decoration-color: color-mix(in oklch, var(--ink-3) 85%, transparent);
+}
+.dl-squiggle[data-sev="user"] {
+  text-decoration-style: dotted;
+  text-decoration-thickness: 2px;
+  text-decoration-color: var(--accent);
+}
+.dl-squiggle[data-muted="true"][data-sev="high"] {
+  text-decoration-color: color-mix(in oklch, var(--red) 38%, transparent);
+}
+.dl-squiggle[data-muted="true"][data-sev="medium"] {
+  text-decoration-color: color-mix(in oklch, var(--orange) 38%, transparent);
+}
+.dl-squiggle[data-muted="true"][data-sev="low"] {
+  text-decoration-color: color-mix(in oklch, var(--ink-3) 40%, transparent);
+}
+/* hover is instant (no transition), per craft "hover restraint" */
+.dl-squiggle:hover,
+.dl-squiggle:focus-visible,
+.dl-squiggle[data-active="true"] {
+  background: color-mix(in oklch, var(--red) 10%, transparent);
+  outline: none;
+}
+.dl-squiggle[data-sev="medium"]:hover,
+.dl-squiggle[data-sev="medium"]:focus-visible,
+.dl-squiggle[data-sev="medium"][data-active="true"] {
+  background: color-mix(in oklch, var(--orange) 12%, transparent);
+}
+.dl-squiggle[data-sev="low"]:hover,
+.dl-squiggle[data-sev="low"]:focus-visible,
+.dl-squiggle[data-sev="low"][data-active="true"] {
+  background: var(--hover-2);
+}
+.dl-squiggle[data-sev="user"]:hover,
+.dl-squiggle[data-sev="user"]:focus-visible,
+.dl-squiggle[data-sev="user"][data-active="true"] {
+  background: var(--accent-tint);
+}
+
+/* the marked-passage ::highlight(dl-sel) rule is injected by SelectionBar
+   (the bundler's CSS parser drops ::highlight() rules from this file) */
+
+/* the original column is selectable; the selection reads as accent */
+.dl-original ::selection {
+  background: color-mix(in oklch, var(--accent) 26%, transparent);
+}
+
+@keyframes dl-tip-in {
+  from {
+    opacity: 0;
+    transform: translateY(2px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dl-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes dl-pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklch, var(--accent) 40%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 8px color-mix(in oklch, var(--accent) 0%, transparent);
+  }
+}
+
+/* levels stacked in one grid cell: the row keeps the height of the longest
+   version, so switching levels is a pure cross-fade with no layout shift */
+.dl-stack {
+  display: grid;
+}
+.dl-stack > * {
+  grid-area: 1 / 1;
+  transition:
+    opacity 200ms var(--ease-out-strong),
+    transform 200ms var(--ease-out-strong),
+    filter 200ms var(--ease-out-strong),
+    visibility 0s linear 200ms;
+}
+.dl-stack > [data-on="false"] {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(2px);
+  filter: blur(1.5px);
+  pointer-events: none;
+  user-select: none;
+  transition-duration: 140ms, 140ms, 140ms, 0s;
+  transition-delay: 0s, 0s, 0s, 140ms;
+}
+.dl-stack > [data-on="true"] {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  filter: none;
+  transition-delay: 40ms, 40ms, 40ms, 0s;
+}
+
+@keyframes dl-fade {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* one column: the original sits above, so only the active level takes space */
+@media (max-width: 767px) {
+  .dl-stack > [data-on="false"] {
+    display: none;
+  }
+  .dl-stack > [data-on="true"] {
+    animation: dl-fade 200ms var(--ease-out-strong) both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dl-stack > * {
+    transform: none !important;
+    filter: none !important;
+  }
+}
+
+/* streaming caret for answers */
+.dl-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  border-radius: 1px;
+  background: var(--ink);
+  vertical-align: text-bottom;
+  translate: 0 -1px;
+  animation: caret-blink 1s step-end infinite;
+}
+.dl-caret[data-streaming="true"] {
+  animation: none;
+}
+
+/* thin scrollbars inside panels */
+.dl-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}

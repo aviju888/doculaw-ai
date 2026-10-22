@@ -10,15 +10,16 @@ import DocumentViewer from './pages/DocumentViewer';
 import Chat from './pages/Chat';
 import Search from './pages/Search';
 import Dashboard from './pages/Dashboard';
-import GlassButtonDemo from './pages/GlassButtonDemo';
 
 function App() {
   return (
     <Router>
       <div className="App">
+        <a href="/" style={{position:"fixed",right:12,bottom:12,zIndex:1000,background:"#fff",color:"#111",padding:"8px 12px",borderRadius:8,boxShadow:"0 0 0 1px #ddd",fontSize:13}}>Open new DocuLaw ↗</a>
         <Routes>
           {/* Public routes without layout */}
           <Route path="/" element={<Landing />} />
+          <Route path="/classic/*" element={<Landing />} />
           <Route path="/onboarding" element={<Onboarding />} />
           
           {/* Protected routes with layout */}

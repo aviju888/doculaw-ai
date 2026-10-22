@@ -1,9 +1,4 @@
-import OpenAI from 'openai';
-
-const groq = new OpenAI({
-  apiKey: process.env.GROQ_API_KEY,
-  baseURL: 'https://api.groq.com/openai/v1',
-});
+import {complete} from '../modern/lib/llm';
 
 interface SimplificationOptions {
   englishProficiency?: string;
@@ -49,14 +44,14 @@ Please provide a simplified version that:
 
 Simplified version:`;
 
-  const response = await groq.chat.completions.create({
-    model: 'llama-3.1-8b-instant',
+  const response = await complete({
+    model: 'fast',
     messages: [{ role: 'user', content: prompt }],
     temperature: 0.3,
-    max_tokens: 2000,
+    maxTokens: 2000,
   });
 
-  return response.choices[0].message.content || 'Unable to simplify document.';
+  return response;
 }
 
 /**
@@ -86,14 +81,14 @@ Important: You are not a lawyer and cannot provide legal advice. Always recommen
     { role: 'user', content: userMessage },
   ];
 
-  const response = await groq.chat.completions.create({
-    model: 'llama-3.1-8b-instant',
+  const response = await complete({
+    model: 'fast',
     messages,
     temperature: 0.5,
-    max_tokens: 1000,
+    maxTokens: 1000,
   });
 
-  return response.choices[0].message.content || 'I apologize, but I was unable to generate a response.';
+  return response;
 }
 
 /**
@@ -106,12 +101,12 @@ ${content}
 
 Summary:`;
 
-  const response = await groq.chat.completions.create({
-    model: 'llama-3.1-8b-instant',
+  const response = await complete({
+    model: 'fast',
     messages: [{ role: 'user', content: prompt }],
     temperature: 0.3,
-    max_tokens: 200,
+    maxTokens: 200,
   });
 
-  return response.choices[0].message.content || 'Unable to generate summary.';
+  return response;
 }

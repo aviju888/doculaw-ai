@@ -4,13 +4,11 @@ import {
   DocumentTextIcon,
   ChatBubbleBottomCenterTextIcon,
   MagnifyingGlassIcon,
-  ShieldCheckIcon,
   UserGroupIcon,
   GlobeAltIcon,
   StarIcon,
   PlayIcon,
 } from '@heroicons/react/24/outline';
-import { GlassButton } from '../components/ui';
 
 const features = [
   {

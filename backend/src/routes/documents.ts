@@ -1,6 +1,7 @@
+import { extractFromBytes, ParseError } from '../modern/lib/doculaw/parse';
 import { Router } from 'express';
 import multer from 'multer';
-import { v4 as uuidv4 } from 'uuid';
+import { saveUploadedDocument } from '../services/uploads';
 import {
   getDocuments,
   getDocument,
@@ -10,8 +11,7 @@ import {
   getDocumentContent,
 } from '../services/storage';
 import { simplifyDocument, summarizeDocument } from '../services/groq';
-import { embedDocument } from '../services/openai';
-import { indexDocument, deleteDocumentVectors } from '../services/pinecone';
+import { deleteDocumentVectors } from '../services/pinecone';
 import { Document, SimplificationRequest } from '../types';
 
 const router = Router();
@@ -35,57 +35,26 @@ router.post('/upload', upload.single('document'), async (req, res) => {
       });
     }
 
-    const fileContent = req.file.buffer.toString('utf-8');
-    const documentId = uuidv4();
-
-    // Create document metadata
-    const document: Document = {
-      id: documentId,
-      title: req.file.originalname,
-      originalContent: fileContent,
-      uploadDate: new Date().toISOString(),
-      status: 'processing',
-      fileType: req.file.mimetype,
-      fileSize: req.file.size,
-    };
-
-    // Save document
-    saveDocument(document);
-    saveDocumentContent(documentId, fileContent);
-
-    // Index in Pinecone (async - don't wait)
-    embedDocument(fileContent)
-      .then(chunks => indexDocument(documentId, chunks))
-      .then(() => {
-        const doc = getDocument(documentId);
-        if (doc) {
-          doc.status = 'completed';
-          saveDocument(doc);
-        }
-      })
-      .catch(err => {
-        console.error('Indexing error:', err);
-        const doc = getDocument(documentId);
-        if (doc) {
-          doc.status = 'completed'; // Still mark complete even if indexing fails
-          saveDocument(doc);
-        }
-      });
+    const fileContent = /\.(txt|md)$/i.test(req.file.originalname)
+      ? req.file.buffer.toString('utf-8')
+      : (await extractFromBytes(new Uint8Array(req.file.buffer),req.file.originalname,10*1024*1024)).text;
+    const document = saveUploadedDocument(fileContent,req.file);
+    const documentId = document.id;
 
     res.json({
       success: true,
       message: 'Document uploaded successfully',
       data: {
         documentId,
-        status: 'processing',
+        status: document.status,
         estimatedProcessingTime: 30,
       },
     });
   } catch (error) {
-    console.error('Upload error:', error);
-    res.status(500).json({
+    console.error('Upload error:', error instanceof Error ? error.message : 'error');
+    res.status(error instanceof ParseError ? error.status : 500).json({
       success: false,
-      message: 'Failed to upload document',
+      message: error instanceof ParseError ? error.message : 'Failed to upload document',
       data: null,
     });
   }
@@ -169,6 +138,7 @@ router.delete('/:id', async (req, res) => {
 
 // Simplify document
 router.post('/simplify', async (req, res) => {
+  if (!process.env.GROQ_API_KEY) return res.status(503).json({success:false,message:'Document simplification requires a configured Groq provider.',data:null});
   try {
     const { documentId, simplificationLevel, userContext } = req.body as SimplificationRequest;
 

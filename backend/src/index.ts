@@ -1,9 +1,8 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
-
-// Load environment variables
-dotenv.config();
+import path from 'path';
+import modernRoutes from './modern/router';
 
 import healthRoutes from './routes/health';
 import documentRoutes from './routes/documents';
@@ -16,7 +15,7 @@ const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({limit:'6mb'}));
 app.use(express.urlencoded({ extended: true }));
 
 // Request logging
@@ -26,29 +25,24 @@ app.use((req, res, next) => {
 });
 
 // Routes
+app.use('/api/doculaw', modernRoutes);
 app.use('/api/health', healthRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/search', searchRoutes);
 
-// Root endpoint
-app.get('/', (req, res) => {
-  res.json({
-    message: 'DocuLaw AI Backend API',
-    version: '1.0.0',
-    endpoints: {
-      health: '/api/health',
-      documents: '/api/documents',
-      chat: '/api/chat',
-      search: '/api/search',
-    },
-  });
-});
+// Both interfaces are separate documents so their global styles never mix.
+const site=path.resolve(__dirname,'../../site');
+app.use(express.static(site));
+app.use('/assets',express.static(path.join(site,'classic/assets')));
+app.get(['/classic','/classic/*','/home','/onboarding','/dashboard','/upload','/documents','/documents/*','/chat','/chat/*','/search'],(_req,res)=>res.sendFile(path.join(site,'classic/index.html')));
+app.get('/',(_req,res)=>res.sendFile(path.join(site,'index.html')));
+app.use('/api',(_req,res)=>res.status(404).json({success:false,message:'Endpoint not found',data:null}));
 
 // Error handling middleware
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Error:', err.message);
-  res.status(500).json({
+  res.status((err as any).status || 500).json({
     success: false,
     message: 'Internal server error',
     data: null,
@@ -60,7 +54,7 @@ async function start() {
   // Initialize Pinecone
   await initPinecone();
 
-  app.listen(PORT, () => {
+  app.listen(Number(PORT), process.env.HOST || '127.0.0.1', () => {
     console.log(`
 ╔═══════════════════════════════════════════════════════╗
 ║                                                       ║

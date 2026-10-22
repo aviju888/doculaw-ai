@@ -6,8 +6,6 @@ import {
   MagnifyingGlassIcon,
   CloudArrowUpIcon,
   ChartBarIcon,
-  ClockIcon,
-  StarIcon,
   ArrowRightIcon,
   EllipsisVerticalIcon,
 } from '@heroicons/react/24/outline';
@@ -93,7 +91,6 @@ const Home: React.FC = () => {
   // Get user profile from localStorage (from onboarding)
   const userProfile = JSON.parse(localStorage.getItem('doculaw_user_profile') || '{}');
   const userName = userProfile.name || 'there';
-  const englishLevel = userProfile.englishProficiency || 'intermediate';
 
   return (
     <div className="space-y-6 sm:space-y-8 overflow-x-hidden">

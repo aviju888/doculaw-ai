@@ -1,3 +1,4 @@
+import apiService from '../services/api';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -9,35 +10,8 @@ import {
 import { SearchResult } from '../types';
 import { formatDate, truncateText } from '../utils/helpers';
 
-// Mock search results
-const mockResults: SearchResult[] = [
-  {
-    id: '1',
-    title: 'Employment Contract Template - Standard Terms',
-    snippet: 'This employment agreement contains standard clauses for confidentiality, termination, and compensation. Key sections include at-will employment provisions...',
-    relevanceScore: 0.95,
-    documentType: 'Employment Contract',
-    lastModified: new Date('2024-01-15'),
-  },
-  {
-    id: '2',
-    title: 'Non-Disclosure Agreement - Technology Company',
-    snippet: 'Comprehensive NDA covering proprietary information, trade secrets, and confidential business data. Includes provisions for employee obligations...',
-    relevanceScore: 0.87,
-    documentType: 'NDA',
-    lastModified: new Date('2024-01-14'),
-  },
-  {
-    id: '3',
-    title: 'Lease Agreement - Residential Property',
-    snippet: 'Standard residential lease agreement with tenant rights and responsibilities. Covers rent, security deposits, maintenance obligations...',
-    relevanceScore: 0.76,
-    documentType: 'Lease Agreement',
-    lastModified: new Date('2024-01-13'),
-  },
-];
-
 const Search: React.FC = () => {
+  const [error,setError]=useState('');
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -53,11 +27,10 @@ const Search: React.FC = () => {
     
     setIsSearching(true);
     
-    // Simulate search API call
-    setTimeout(() => {
-      setResults(mockResults);
-      setIsSearching(false);
-    }, 1000);
+    setError('');
+    try {setResults(await apiService.searchDocuments({query}));}
+    catch {setResults([]);setError('Search is unavailable. Check the backend search provider configuration.');}
+    finally {setIsSearching(false);}
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -68,6 +41,7 @@ const Search: React.FC = () => {
 
   return (
     <div className="px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
+      {error && <p role="alert" className="text-red-700">{error}</p>}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Search Legal Documents</h1>
         <p className="mt-2 text-gray-600">
