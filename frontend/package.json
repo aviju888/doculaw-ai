@@ -25,9 +25,11 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "node scripts/hosted-build.cjs build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "build:classic": "react-scripts build",
+    "install:all": "node scripts/hosted-build.cjs install"
   },
   "eslintConfig": {
     "extends": [

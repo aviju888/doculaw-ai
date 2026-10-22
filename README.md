@@ -38,6 +38,14 @@ The backend tests use temporary storage and harmless owned text/PDF/DOCX fixture
 
 ## Hosting
 
-`site/` contains the two frontend builds. The Node backend serves both and the APIs. `vercel.json` packages static frontend routing only; for a static host, point `REACT_APP_API_BASE_URL` and `VITE_API_BASE_URL` at your deployed backend's `/api` URL at build time. Never put secret keys in either frontend variable. Hosted backend persistence, authentication, provider permissions, and live model behavior need separate acceptance. No deployment is part of this branch.
+`site/` contains the two frontend builds. The Node backend serves both and the APIs. `vercel.json` packages static frontend routing only; for a static host, point `REACT_APP_API_BASE_URL` and `VITE_API_BASE_URL` at your deployed backend's `/api` URL at build time. Never put secret keys in either frontend variable. Hosted backend persistence, authentication, provider permissions, and live model behavior need separate acceptance. The existing Git integration may create static previews when this branch is pushed; those do not deploy or verify the separate API.
 
 See `docs/modern-classic-migration.md` for source provenance, compatibility decisions and verification limits. The Beautiful UI token license is preserved in `docs/BEAUTIFUL-UI-LICENSE`.
+
+### Existing Vercel project root
+
+The existing Vercel project has Root Directory `frontend`. `frontend` now exposes `install:all` and a combined `build` entry point that delegate to the repository orchestration; the Classic-only compiler is named `build:classic` to prevent recursion. Building from the repository root writes `site/`. Building from `frontend/` additionally writes the same combined static output to `frontend/site/`, matching the existing `vercel.json` output directory relative to that configured root. Both paths require Modern and Classic to build successfully.
+
+The Vercel build needs access to repository files outside `frontend` (the documented default for projects created after August 2020). If that option has been disabled, the bridge stops with an actionable error instead of emitting only Classic. Review the existing project's “Include source files outside of the Root Directory in the Build Step” option before considering any Root Directory change; no remote settings are changed by these scripts.
+
+This fixes source/build-root compatibility only. The static artifact does not contain an Express deployment or persistent document storage; configure the separately hosted API via the public build-time API origin variables before treating it as a functional hosted preview.

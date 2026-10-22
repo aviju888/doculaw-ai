@@ -1,6 +1,6 @@
 # DocuLaw modern + Classic migration
 
-Status: locally implemented and validated; independent review pending. No push, merge, deployment or live-provider acceptance is authorized.
+Status: locally implemented and validated; draft PR #3 now exists. Its automatic static preview failed at the configured-root install step; the source correction below is locally tested and pending coordinator review/push. No merge or manual deployment was performed by this task; live-provider and hosted backend acceptance remain unverified.
 
 Baseline: original product commit `3cf3b67f8e3248498ce5ffdd09501a2abf2aef40`. Original README-only changes describe the product but are excluded from the baseline. Tracked dependency damage and the nested older checkout are excluded. Original checkouts are read-only. Source reference tree has no Git metadata at its given path; file fingerprints will accompany the port.
 
@@ -59,7 +59,7 @@ No storage migration or backfill. Backend must run on a Node host with writable 
 
 ## Review and remaining limits
 
-Parent coordinator owns independent review. No push, PR, merge or deploy occurred. Only owned text fixtures and the included synthetic sample leases were used. Live Groq output/latency/account access, OpenAI embeddings, Pinecone indexing/search, hosted routes/persistence and provider permissions remain unverified. Existing filesystem persistence and authentication limitations remain; this branch is a local migration, not production-readiness certification.
+At the original local handoff, the parent coordinator owned independent review and no push, PR, merge or deploy had occurred. Later approved publishing and automatic-build evidence are recorded separately below. Only owned text fixtures and the included synthetic sample leases were used. Live Groq output/latency/account access, OpenAI embeddings, Pinecone indexing/search, hosted routes/persistence and provider permissions remain unverified. Existing filesystem persistence and authentication limitations remain; this branch is a local migration, not production-readiness certification.
 
 The static Vercel package still needs an independently hosted backend, build-time public API origins and hosted acceptance. The combined Express build is the fully exercised local path. Rollback: return the default to the existing Classic document or revert this feature commit; data remains in the original format.
 
@@ -76,3 +76,17 @@ Regression evidence: the old implementation failed on the exact nonempty provide
 Tiny compatibility corrections: Classic formats the API's byte-valued file size with the existing formatter and displays unavailable optional stats as an em dash. Browser acceptance now waits for the completed assistant answer, then checks **that answer region** for the sample's `$75` late fee and a `§5` citation; the submitted question cannot satisfy those assertions. The labelled answer region adds accessibility without changing layout.
 
 Validation: `npm test` passed **139 tests** (132 backend, 7 modern frontend), `npm run typecheck` passed, `CI=true npm run build` passed, and the stronger owned-fixture browser smoke passed with zero page errors. Modern's test-only dependencies are dev dependencies; production still starts compiled JavaScript. The pre-existing Browserslist maintenance notice remains nonblocking. Independent scoped re-review is pending; hosted/live-provider acceptance remains separate.
+
+## Automatic Vercel build evidence and root compatibility
+
+This is new integration evidence after the reviewed stream/request fixes. The coordinator pushed the approved branch and opened draft PR #3. The existing Git integration automatically built `1b166c1`; deployment `dpl_68fQ3YufiVuZomcQYabbe6iTuUJ6` failed on **2026-10-22 at 19:52 UTC** with `Missing script: install:all`. This automatic attempt is not a manual deployment by this implementation task.
+
+Read-only `vercel project inspect doculaw-ai` confirms the existing project uses Root Directory `frontend`, Node `22.x`, and the Create React App preset. The root `vercel.json` commands were applied, but npm ran inside `frontend`, whose manifest lacked the combined-install script. The original root-only local build therefore did not reproduce the actual deployment entry point.
+
+Source correction: `frontend/scripts/hosted-build.cjs` exposes combined install/build entry points through `frontend/package.json`. It delegates to repository orchestration; the root uses explicit `build:classic` to prevent recursion. Both Modern and Classic remain mandatory. The frontend-root build additionally copies the combined static artifact to `frontend/site`, matching `outputDirectory: site` relative to the configured root. Direct-root builds retain `site/`. No remote project setting was changed.
+
+Local validation: the exact failed `npm run install:all` command now passes from `frontend` using isolated cached dependencies. `CI=true npm run build` passes from both repository root and `frontend`. SHA-256 comparison confirms all **18 files** in `site/` and `frontend/site/` are byte-identical to the direct-root combined artifact, including the Modern default and Classic HTML/bundles; no API/backend directory is packaged. An isolated-parent-source probe intentionally fails with an actionable diagnostic instead of emitting Classic alone.
+
+Access to source outside `frontend` is required. [Vercel documents that this option is enabled by default for projects created after August 2020](https://vercel.com/docs/monorepos/monorepo-faq#can-i-share-source-files-between-projects-are-shared-packages-supported); this project was created in September 2025. The installed read-only CLI does not expose that exact flag, so it is not asserted as verified. If someone disabled it, review enabling that specific inclusion option before considering a Root Directory change. The bridge checks for the required source and stops clearly when it is unavailable.
+
+Status: source correction is locally tested; the next automatic preview build is pending the coordinator's scoped review/push. A successful static preview build will not prove backend acceptance. The separately hosted Node service must expose `/api/doculaw/*`, preserve storage, and pass owned-fixture upload/analysis/Q&A checks before release. Existing hosted backend readiness, modern API availability, API-origin configuration and live providers remain unverified. No remote setting change, manual deploy, push or provider request was performed by this fix task.
